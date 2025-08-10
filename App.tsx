@@ -1,12 +1,13 @@
-
 import React, { useState } from 'react';
 import { ChatInterface } from './components/ChatInterface';
 import { useChat } from './hooks/useChat';
 import { SplashScreen } from './components/SplashScreen';
 import { AnimatedWaves } from './components/AnimatedWaves';
+import { FocusQueryModal } from './components/FocusQueryModal';
+import { AnimatePresence } from 'framer-motion';
 
 const App: React.FC = () => {
-  const { messages, isLoading, error, sendMessage, startSession } = useChat();
+  const { messages, isLoading, error, sendMessage, startSession, activeModal, setActiveModal } = useChat();
   const [appState, setAppState] = useState<'splash' | 'chat'>('splash');
 
   const handleBegin = () => {
@@ -31,6 +32,16 @@ const App: React.FC = () => {
             sendMessage={sendMessage} 
           />
       </main>
+
+      <AnimatePresence>
+        {activeModal && (
+          <FocusQueryModal 
+            toolCall={activeModal} 
+            onClose={() => setActiveModal(null)} 
+            onSend={sendMessage} 
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

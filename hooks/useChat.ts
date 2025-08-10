@@ -1,4 +1,3 @@
-
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { GoogleGenAI, Chat } from '@google/genai';
 import { ChatMessage, ToolCall, ToolName } from '../types';
@@ -62,6 +61,7 @@ export const useChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeModal, setActiveModal] = useState<ToolCall<'focus_query'> | null>(null); // New state for modal
   const chatRef = useRef<Chat | null>(null);
 
   useEffect(() => {
@@ -141,14 +141,19 @@ export const useChat = () => {
 
       // LAYER 3: THE SCHEMA SHIELD
       if (isJsonParseSuccess && validateToolCall(parsedJson)) {
-        // SUCCESS: Valid tool call received.
-        const aiMessage: ChatMessage = {
-          id: self.crypto.randomUUID(),
-          sender: 'ai',
-          text: '',
-          toolCall: parsedJson,
-        };
-        setMessages((prev) => [...prev, aiMessage]);
+        // Handle FocusQuery separately
+        if (parsedJson.tool_name === ToolName.FocusQuery) {
+          setActiveModal(parsedJson as ToolCall<'focus_query'>);
+        } else {
+          // SUCCESS: Valid tool call received.
+          const aiMessage: ChatMessage = {
+            id: self.crypto.randomUUID(),
+            sender: 'ai',
+            text: '',
+            toolCall: parsedJson,
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+        }
       } else {
         // FAILURE: Invalid response. Activate recovery protocol.
         if (isRetry) {
@@ -159,7 +164,8 @@ export const useChat = () => {
             text: fullResponseText,
           };
           setMessages((prev) => [...prev, aiMessage]);
-        } else {
+        }
+        else {
           // This is the first failure. Trigger the "Clarification" fallback.
           console.error("Shield & Recover: Invalid AI response. Retrying.", { response: fullResponseText });
 
@@ -199,5 +205,5 @@ export const useChat = () => {
     }
   }, []);
 
-  return { messages, isLoading, error, sendMessage, startSession };
+  return { messages, isLoading, error, sendMessage, startSession, activeModal, setActiveModal };
 };
