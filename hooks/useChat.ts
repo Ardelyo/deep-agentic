@@ -78,6 +78,9 @@ export const useChat = () => {
           },
         });
         chatRef.current = chat;
+
+        // Removed static introduction message
+
       } catch (e) {
         setError(e instanceof Error ? e.message : 'An unknown error occurred during initialization.');
         console.error(e);
@@ -85,12 +88,6 @@ export const useChat = () => {
     };
     initializeChat();
   }, []);
-
-  const startSession = useCallback(() => {
-    // Trigger the AI to initiate conversation based on the new SYSTEM_PROMPT.
-    // Sending an empty string as a prompt to signal the start of the session.
-    sendMessage('');
-  }, [sendMessage]); // Add sendMessage to the dependency array
 
   const sendMessage = useCallback(async (text: string, isRetry = false) => {
     if (!chatRef.current) {
@@ -204,6 +201,12 @@ export const useChat = () => {
       }
     }
   }, []);
+
+  const startSession = useCallback(() => {
+    // Trigger the AI to initiate conversation based on the new SYSTEM_PROMPT.
+    // Sending an empty string as a prompt to signal the start of the session.
+    sendMessage('');
+  }, [sendMessage]); // Add sendMessage to the dependency array
 
   return { messages, isLoading, error, sendMessage, startSession, activeModal, setActiveModal };
 };
