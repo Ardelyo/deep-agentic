@@ -87,10 +87,10 @@ export const useChat = () => {
   }, []);
 
   const startSession = useCallback(() => {
-    // Aether is a silent interface. It does not initiate conversation.
-    // This function is kept for potential future use or state initialization
-    // but it will not send any messages.
-  }, []);
+    // Trigger the AI to initiate conversation based on the new SYSTEM_PROMPT.
+    // Sending an empty string as a prompt to signal the start of the session.
+    sendMessage('');
+  }, [sendMessage]); // Add sendMessage to the dependency array
 
   const sendMessage = useCallback(async (text: string, isRetry = false) => {
     if (!chatRef.current) {
